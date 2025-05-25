@@ -32,7 +32,7 @@ export async function execute(interaction) {
       },
     )
     .setThumbnail('https://static.ankama.com/dofus/www/game/items/200/8206.png') // Icône de dragodinde
-    .setFooter({ text: 'Guide simplifié par ton bot Discord' })
+    .setFooter({ text: 'Guide apprivoisement de monture' })
     .setTimestamp();
 
   await interaction.reply({ embeds: [embed] });

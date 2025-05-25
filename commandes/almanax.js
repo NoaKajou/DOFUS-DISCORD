@@ -61,7 +61,7 @@ export async function getAlmanaxEmbed() {
 }
 
 export function auto(client) {
-  const channelId = process.env.CHANNEL_ID;
+  const channelId = process.env.ALMANAX_CHANNEL;
 
   schedule.scheduleJob('59 1 * * *', async () => {
     try {
