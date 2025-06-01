@@ -12,18 +12,11 @@ if (!fs.existsSync(xpFile)) fs.writeFileSync(xpFile, '{}');
 let userData = JSON.parse(fs.readFileSync(xpFile));
 
 // Commande /xp
-export const data = [
-  new SlashCommandBuilder()
+export const xp = {
+  data: new SlashCommandBuilder()
     .setName('xp')
     .setDescription('🎖️ Affiche ton niveau et ton prestige'),
-  new SlashCommandBuilder()
-    .setName('prestige')
-    .setDescription('🏅 Permet de faire un prestige quand tu es niveau 100')
-];
-
-// Ici, execute ne sert que pour /xp
-export async function execute(interaction) {
-  if (interaction.commandName === 'xp') {
+  async execute(interaction) {
     const userId = interaction.user.id;
     if (!userData[userId]) userData[userId] = { xp: 0, level: 1, prestige: 0 };
 
@@ -50,7 +43,15 @@ export async function execute(interaction) {
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
-  } else if (interaction.commandName === 'prestige') {
+  }
+};
+
+// Commande /prestige
+export const prestige = {
+  data: new SlashCommandBuilder()
+    .setName('prestige')
+    .setDescription('🏅 Permet de faire un prestige quand tu es niveau 100'),
+  async execute(interaction) {
     const userId = interaction.user.id;
     if (!userData[userId]) userData[userId] = { xp: 0, level: 1, prestige: 0 };
     const user = userData[userId];
@@ -59,12 +60,12 @@ export async function execute(interaction) {
       await interaction.reply({
         content: '❌ Tu dois être au niveau 100 pour faire un prestige !',
         flags: 1 << 6
-    });
+      });
       return;
     }
 
     if (user.prestige >= 5) {
-      await interaction.reply({ content: '🏅 Tu as déjà atteint le prestige maximum !', ephemeral: true });
+      await interaction.reply({ content: '🏅 Tu as déjà atteint le prestige maximum !', flags: 1 << 6 });
       return;
     }
 
@@ -91,7 +92,7 @@ export async function execute(interaction) {
 
     await interaction.reply({ embeds: [embed] });
   }
-}
+};
 
 // Ajout automatique XP
 export function auto(client) {

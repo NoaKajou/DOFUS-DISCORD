@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits, Collection, REST, Routes } from 'discord.js'
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'url';
+import { handleButton } from './commandes/ticket.js';
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -29,16 +30,17 @@ for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
   const commandModule = await import(pathToFileURL(filePath));
 
-  const commandList = Array.isArray(commandModule.data) ? commandModule.data : [commandModule.data];
-
-  for (const cmd of commandList) {
-    client.commands.set(cmd.name, {
-      ...commandModule,
-      data: cmd
-    });
-    commands.push(cmd.toJSON());
+  // Pour chaque export du module
+  for (const key of Object.keys(commandModule)) {
+    const exported = commandModule[key];
+    // Si c'est une commande (data + execute)
+    if (exported && exported.data && exported.execute) {
+      client.commands.set(exported.data.name, exported);
+      commands.push(exported.data.toJSON());
+    }
   }
 
+  // Appelle la fonction auto si elle existe (même si pas de commande)
   if (typeof commandModule.auto === 'function') {
     commandModule.auto(client);
   }
@@ -56,6 +58,10 @@ try {
 
 // Gestion des interactions
 client.on('interactionCreate', async interaction => {
+  if (interaction.isButton()) {
+    await handleButton(interaction);
+  }
+
   if (!interaction.isCommand()) return;
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
